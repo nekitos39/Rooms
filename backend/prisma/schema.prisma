@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Сущность User
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+   bookings  Booking[] // Связь: у пользователя может быть много бронирований
+}
+
+// Модель для Аудитории
+model Room {
+  id        String   @id @default(cuid())
+  name      String
+  number    String   @unique // Например, "201"
+  capacity  Int
+  features  String[] // Например, ["projector", "whiteboard"]
+  status    String   @default("available") 
+  createdAt DateTime @default(now())
+  bookings  Booking[] // Связь: у аудитории может быть много бронирований
+}
+
+// Модель для Брони
+model Booking {
+  id          String   @id @default(cuid())
+  title       String   // Например, "Семинар по веб-разработке"
+  startTime   DateTime // Время начала брони
+  endTime     DateTime // Время окончания брони
+  notes       String?  // Заметки к брони
+
+  // Связи
+  user   User @relation(fields: [userId], references: [id])
+  userId String
+  room   Room @relation(fields: [roomId], references: [id])
+  roomId String
+
+  createdAt DateTime @default(now())
+}
