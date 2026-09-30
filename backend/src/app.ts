@@ -35,7 +35,7 @@ export async function buildApp() {
 
   // CORS ограничивает кросс-доменные запросы. Здесь полностью запрещаем их (origin: false) по умолчанию.
 await app.register(cors, {
-  origin: ['https://dist0pia.github.io',/^http:\/\/localhost:\d+$/,],
+  origin: ['https://nekitos39.github.io',/^http:\/\/localhost:\d+$/,],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],});
