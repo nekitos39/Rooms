@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "1.0",
+  "exportedAt": "2025-09-05T08:00:00Z",
+  "rooms": [
+    {
+      "id": "r-101",
+      "code": "101",
+      "name": "Аудитория 101",
+      "capacity": 30,
+      "equipment": ["projector", "whiteboard"],
+      "status": "available"
+    },
+    {
+      "id": "r-203",
+      "code": "203",
+      "name": "Аудитория 203",
+      "capacity": 20,
+      "equipment": [],
+      "status": "available"
+    }
+  ],
+  "assets": [
+    {
+      "id": "a-proj-1",
+      "name": "Проектор Epson",
+      "inventoryCode": "PRJ-001",
+      "status": "available"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "b-1",
+      "title": "Семинар",
+      "startTime": "2025-09-05T08:00:00Z",
+      "endTime": "2025-09-05T09:30:00Z",
+      "notes": "Нужен HDMI",
+      "room": { "id": "r-101", "name": "Аудитория 101", "number": "101" },
+      "user": { "id": "u-1", "email": "admin@example.com" }
+    }
+  ]
+}
