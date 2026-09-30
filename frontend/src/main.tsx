@@ -5,13 +5,13 @@ import App from './App.tsx'
 import { AuthProvider } from '@/context/auth'
 
 async function enableMocking() {
-  // if (import.meta.env.DEV) { 
-  //   const { worker } = await import('./mocks/browser')
-  //  await worker.start({
-  //    onUnhandledRequest: "bypass",
-  //    serviceWorker: { url: "/mockServiceWorker.js" },
-  //  });
-  // }
+  const { worker } = await import('./mocks/browser');
+  await worker.start({
+    onUnhandledRequest: "bypass",
+    serviceWorker: {
+      url: `${import.meta.env.BASE_URL}mockServiceWorker.js`,
+    },
+  });
 }
 
 enableMocking().then(() => {
