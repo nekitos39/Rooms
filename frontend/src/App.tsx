@@ -4,6 +4,7 @@ import { Header } from '@/Components/Header';
 import { RoomsTable } from '@/Components/RoomsTable/RoomsTable';
 import { AssetsTable } from '@/Components/AssetsTable/AssetsTable';
 import { BookingsPage } from '@/Components/BookingsPage';
+import { ImportExportPage } from '@/Components/ImportExportPage/ImportExportPage';
 import { fetchRooms, type RoomDto } from "@/api/roomsApi";
 import './App.css';
 
@@ -33,6 +34,7 @@ function App() {
 
   const renderContent = () => {
     if (active === 'bookings') return <BookingsPage onBookingCreated={loadRooms} />;
+    if (active === 'import-export') return <Container maxWidth="lg"><Box sx={{ my: 2 }}><ImportExportPage /></Box></Container>;
 
     if (active === 'catalog') {
       return (
