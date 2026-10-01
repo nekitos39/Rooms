@@ -10,6 +10,7 @@ services:
       - /app/node_modules
     environment:
       - WATCHPACK_POLLING=true
+    command: sh -c "cp .env.docker .env.local 2>/dev/null || true && npm run dev -- --host 0.0.0.0"
 
   nginx:
     image: nginx:alpine

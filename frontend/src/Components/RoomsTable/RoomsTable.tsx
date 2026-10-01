@@ -1,11 +1,9 @@
 import { useState } from "react";
 import {
   Paper, Table, TableHead, TableRow, TableCell, TableBody,
-  Chip, IconButton, Stack, Typography, TextField,
+  Chip, Stack, Typography, TextField,
 } from "@mui/material";
-import {
-  VisibilityOutlined, EditOutlined, DeleteOutline, Groups2Outlined,
-} from "@mui/icons-material";
+import { Groups2Outlined } from "@mui/icons-material";
 import type { RoomDto } from "@/api/roomsApi";
 
 const STATUS_LABEL: Record<RoomDto["status"], string> = {
@@ -65,7 +63,6 @@ export function RoomsTable({ items }: { items: RoomDto[] }) {
               <TableCell width={160} align="right">Вместимость</TableCell>
               <TableCell>Оборудование</TableCell>
               <TableCell width={170}>Статус</TableCell>
-              <TableCell width={120} align="center">Действия</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -97,11 +94,6 @@ export function RoomsTable({ items }: { items: RoomDto[] }) {
                     color={STATUS_COLOR[r.status]}
                     variant={r.status === "maintenance" ? "outlined" : "filled"}
                   />
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton size="small" title="Просмотр"><VisibilityOutlined fontSize="small" /></IconButton>
-                  <IconButton size="small" title="Редактировать"><EditOutlined fontSize="small" /></IconButton>
-                  <IconButton size="small" color="error" title="Удалить"><DeleteOutline fontSize="small" /></IconButton>
                 </TableCell>
               </TableRow>
             ))}
