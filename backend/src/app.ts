@@ -9,31 +9,20 @@ import { Type as T } from 'typebox'
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import { ValidationProblem, ProblemDetails, User, Health } from './types.js'
 
-// Этот модуль собирает все настройки Fastify: плагины инфраструктуры, обработчики ошибок и маршруты API.
-
-/**
- * Создает и настраивает экземпляр Fastify, готовый к запуску.
- */
 export async function buildApp() {
   const app = Fastify({
-    logger: true, // Подключаем встроенный логгер Fastify.
-    trustProxy: true, // Разрешаем доверять заголовкам X-Forwarded-* от прокси/ingress.
-    /**
-     * Схема валидации TypeBox -> Fastify генерирует массив ошибок.
-     * Мы превращаем его в ValidationProblem, чтобы вернуть клиенту единый формат Problem Details.
-     */
+    logger: true,
+    trustProxy: true, 
+  
     schemaErrorFormatter(errors, dataVar) {
       const msg = errors.map((e) => e.message).filter(Boolean).join('; ') || 'Validation failed'
       return new ValidationProblem(msg, errors, dataVar)
     }
-  }).withTypeProvider<TypeBoxTypeProvider>() // Позволяет Fastify понимать типы TypeBox при описании схем.
+  }).withTypeProvider<TypeBoxTypeProvider>() 
 
-  // === Инфраструктурные плагины ===
 
-  // Helmet добавляет безопасные HTTP-заголовки (Content-Security-Policy, X-DNS-Prefetch-Control и др.).
   await app.register(helmet)
 
-  // CORS ограничивает кросс-доменные запросы. Здесь полностью запрещаем их (origin: false) по умолчанию.
 await app.register(cors, {
   origin: [
   'https://nekitos39.github.io',
@@ -43,14 +32,10 @@ await app.register(cors, {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],});
 
-  /**
-   * Ограничитель количества запросов на IP.
-   * Плагин автоматически вернет 429, а мы формируем Problem Details в errorResponseBuilder.
-   */
   await app.register(rateLimit, {
-    max: 100, // Максимум 100 запросов
-    timeWindow: '1 minute', // За одну минуту
-    enableDraftSpec: true, // Добавляет стандартные RateLimit-* заголовки в ответ
+    max: 100, 
+    timeWindow: '1 minute', 
+    enableDraftSpec: true, 
     addHeaders: {
       'x-ratelimit-limit': true,
       'x-ratelimit-remaining': true,
@@ -69,9 +54,6 @@ await app.register(cors, {
     }
   })
 
-  /**
-   * Документация API в формате OpenAPI 3.0.
-   */
   await app.register(swagger, {
     openapi: {
       openapi: '3.0.3',
@@ -88,15 +70,8 @@ await app.register(cors, {
     }
   })
 
-  // Плагин с PrismaClient: открывает соединение с БД и добавляет app.prisma во все маршруты.
   await app.register(prismaPlugin)
 
-  // === Глобальные обработчики ошибок ===
-
-  /**
-   * Единая точка обработки ошибок. Мы приводим их к Problem Details и отправляем клиенту JSON.
-   * ValidationProblem превращается в 400, остальные ошибки хранят свой статус или получают 500.
-   */
   app.setErrorHandler<FastifyError | ValidationProblem>((err, req, reply) => {
     const status = typeof err.statusCode === 'number' ? err.statusCode : 500
     const isValidation = err instanceof ValidationProblem
@@ -113,7 +88,6 @@ await app.register(cors, {
     reply.code(status).type('application/problem+json').send(problem)
   })
 
-  // Отдельный обработчик 404: отвечает в формате Problem Details.
   app.setNotFoundHandler((request, reply) => {
     reply.code(404).type('application/problem+json').send({
       type: 'about:blank',
@@ -124,11 +98,6 @@ await app.register(cors, {
     } satisfies ProblemDetails)
   })
 
-  // === Маршруты API ===
-
-/**
- * GET /api/rooms — возвращает список всех аудиторий.
- */
 app.get(
   '/api/rooms',
   {
@@ -149,9 +118,6 @@ app.get(
   }
 );
 
-/**
- * POST /api/rooms — создает новую аудиторию.
- */
 app.post(
   '/api/rooms',
   {
@@ -185,9 +151,6 @@ app.post(
   }
 );
 
-/**
- * POST /api/bookings — создает новую бронь.
- */
 app.post(
   '/api/bookings',
   {
@@ -262,9 +225,6 @@ app.post(
   }
 );
 
-  /**
-   * GET /api/users — примеры чтения данных из базы через Prisma.
-   */
   app.get(
     '/api/users',
     {
@@ -300,10 +260,6 @@ app.post(
     }
   )
 
-  /**
-   * GET /api/health — health-check для мониторинга.
-   * Пытаемся сделать минимальный запрос в БД. Если БД недоступна, возвращаем 503.
-   */
   app.get(
     '/api/health',
     {
@@ -337,11 +293,9 @@ app.post(
     },
     async (_req, reply) => {
       try {
-        // Если SELECT 1 прошел — сервис готов.
         await app.prisma.$queryRaw`SELECT 1`
         return { ok: true } as Health
       } catch {
-        // Возвращаем 503, чтобы условный балансировщик мог вывести инстанс из ротации.
         reply.code(503).type('application/problem+json').send({
           type: 'https://example.com/problems/dependency-unavailable',
           title: 'Service Unavailable',
@@ -353,20 +307,16 @@ app.post(
     }
   )
 
-  // Служебный маршрут: возвращает OpenAPI-спецификацию.
   app.get(
     '/openapi.json',
     {
-      schema: { hide: true, tags: ['Internal'] } // Скрыт из списка, но доступен для клиентов/тестов
+      schema: { hide: true, tags: ['Internal'] } 
     },
     async (_req, reply) => {
       reply.type('application/json').send(app.swagger())
     }
   )
 
-  /**
- * GET /api/bookings — возвращает список всех бронирований.
- */
 app.get(
   '/api/bookings',
   {
