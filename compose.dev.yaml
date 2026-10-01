@@ -23,7 +23,7 @@ services:
 
   backend:
     ports:
-        - "5555:5555"
+        - "5555:3000"
     build:
       context: ./backend
       dockerfile: Dockerfile

@@ -2,12 +2,13 @@
 x-env-file: &env_file [.env]
 
 x-db-env: &db_env
-  POSTGRES_DB: ${POSTGRES_DB}
-  POSTGRES_USER: ${POSTGRES_USER}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  MARIADB_DATABASE: ${MARIADB_DATABASE}
+  MARIADB_USER: ${MARIADB_USER}
+  MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+  MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
 
 x-fastify-env: &fastify_env
-  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+  DATABASE_URL: mysql://${MARIADB_USER}:${MARIADB_PASSWORD}@db:3306/${MARIADB_DATABASE}
   PORT: "3000"
 
 x-db-healthy: &db_healthy
@@ -17,14 +18,14 @@ x-db-healthy: &db_healthy
 
 services:
   db:
-    image: postgres:17-alpine
+    image: mariadb:11
     env_file: *env_file
     environment: *db_env
-    volumes: [ "db_data:/var/lib/postgresql/data" ]
+    volumes: [ "db_data:/var/lib/mysql" ]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
-      timeout: 3s
+      timeout: 5s
       retries: 10
 
   backend:
@@ -40,11 +41,9 @@ services:
   scalar:
     image: scalarapi/api-reference:latest
     environment:
-      # URL относительный, редирет идет через тот же NGINX
       API_REFERENCE_CONFIG: >
         {"layout":"modern","theme":"purple",
          "sources":[{"name":"API","url":"/openapi.json"}]}
-    <<: *db_healthy
     expose: ["8080"]
 
 volumes:
